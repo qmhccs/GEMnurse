@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Geriatric Front Door Tool – QMH AED</title>
+//api.fontshare.com"/>
+//api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{
+--text-xs:clamp(.75rem,.7rem + .25vw,.875rem);
+--text-sm:clamp(.875rem,.8rem + .35vw,1rem);
+--text-base:clamp(1rem,.95rem + .25vw,1.125rem);
+--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+--sp1:.25rem;--sp2:.5rem;--sp3:.75rem;--sp4:1rem;--sp5:1.25rem;--sp6:1.5rem;--sp8:2rem;--sp10:2.5rem;--sp12:3rem;--sp16:4rem;
+--bg:#f7f6f2;--surf:#fbfbf9;--surf2:#f1efea;--bdr:#d4d1ca;--div:#dcd9d5;
+--tx:#28251d;--txm:#68665f;--txf:#9d9a92;--txi:#f9f8f4;
+--pri:#01696f;--prih:#0c4e54;--prihl:#dbeceb;
+--warn:#964219;--warnhl:#f3e0d4;
+--suc:#437a22;--suchl:#deead6;
+--err:#a12c7b;--errhl:#f2dbe8;
+--blue:#006494;--bluehl:#cce0ed;
+--rad-sm:.375rem;--rad-md:.5rem;--rad-lg:.75rem;--rad-xl:1rem;--rad-f:9999px;
+--sh-sm:0 1px 2px rgba(40,37,29,.06);--sh-md:0 4px 12px rgba(40,37,29,.08);
+--font:'Satoshi','Inter',sans-serif;--trans:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"]{
+--bg:#171614;--surf:#1c1b19;--surf2:#23211f;--bdr:#393836;--div:#2a2927;
+--tx:#e1dfda;--txm:#b0ada6;--txf:#7f7b74;--txi:#1a1917;
+--pri:#4f98a3;--prih:#67aeb8;--prihl:#233437;
+--warn:#d28c62;--warnhl:#49362b;--suc:#79b456;--suchl:#2d3f26;
+--err:#d163a7;--errhl:#442738;--blue:#5591c7;--bluehl:#2a3e52;
+--sh-sm:0 1px 2px rgba(0,0,0,.25);--sh-md:0 4px 16px rgba(0,0,0,.32);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font);font-size:var(--text-sm);line-height:1.6;background:var(--bg);color:var(--tx)}
+img,svg{display:block;max-width:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+table{width:100%;border-collapse:collapse}
+:focus-visible{outline:2px solid var(--pri);outline-offset:3px;border-radius:var(--rad-sm)}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100dvh}
+.sidebar{background:var(--surf);border-right:1px solid var(--bdr);padding:var(--sp5);position:sticky;top:0;height:100dvh;overflow-y:auto;display:flex;flex-direction:column;gap:var(--sp4)}
+.brand{display:flex;align-items:center;gap:var(--sp3)}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--pri),color-mix(in srgb,var(--pri) 55%,white));display:grid;place-items:center;color:#fff;flex-shrink:0;box-shadow:var(--sh-md)}
+.brand-text h1{font-size:var(--text-base);font-weight:900;line-height:1.15}
+.brand-text p{font-size:var(--text-xs);color:var(--txf)}
+.nav-label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--txf);margin-bottom:var(--sp2);padding-left:var(--sp2)}
+.nav-btn{width:100%;display:flex;align-items:center;gap:var(--sp3);padding:var(--sp2) var(--sp3);border-radius:var(--rad-lg);font-size:var(--text-sm);text-align:left;transition:all var(--trans);margin-bottom:2px}
+.nav-btn svg{flex-shrink:0;opacity:.6}
+.nav-btn:hover,.nav-btn.active{background:var(--prihl);color:var(--pri)}
+.nav-btn.active svg{opacity:1}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:var(--sp4);padding:var(--sp3) var(--sp6);border-bottom:1px solid var(--bdr);background:color-mix(in srgb,var(--surf) 90%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.page-title h2{font-size:var(--text-xl);font-weight:900;line-height:1}
+.page-title .sub{font-size:var(--text-xs);color:var(--txm);margin-top:2px}
+.toolbar{display:flex;gap:var(--sp2);align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:var(--sp2);padding:.6rem 1rem;border-radius:var(--rad-f);font-size:var(--text-xs);font-weight:700;transition:all var(--trans);white-space:nowrap}
+.btn-pri{background:var(--pri);color:var(--txi)}.btn-pri:hover{background:var(--prih)}
+.btn-sec{background:var(--surf2);border:1px solid var(--bdr)}.btn-sec:hover{background:var(--div)}
+.content{padding:var(--sp5) var(--sp6);display:grid;gap:var(--sp5)}
+.page{display:none;gap:var(--sp5)}.page.active{display:grid}
+.card{background:var(--surf);border:1px solid color-mix(in srgb,var(--tx) 9%,transparent);border-radius:var(--rad-xl);padding:var(--sp5);box-shadow:var(--sh-sm)}
+.card-title{font-size:var(--text-base);font-weight:800;margin-bottom:var(--sp3)}
+.muted{color:var(--txm)}.tiny{font-size:var(--text-xs);color:var(--txm)}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp4)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp4)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp4)}
+.kpi{background:var(--surf2);border:1px solid var(--div);border-radius:var(--rad-lg);padding:var(--sp4)}
+.kpi .k-label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.05em;color:var(--txf)}
+.kpi .k-val{font-size:var(--text-xl);font-weight:900;line-height:1.05;margin-top:var(--sp1)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:.3rem .7rem;border-radius:var(--rad-f);font-size:var(--text-xs);font-weight:800}
+.chip.green{background:var(--suchl);color:var(--suc)}.chip.amber{background:var(--warnhl);color:var(--warn)}.chip.red{background:var(--errhl);color:var(--err)}.chip.blue{background:var(--bluehl);color:var(--blue)}.chip.teal{background:var(--prihl);color:var(--pri)}
+.list{display:grid;gap:var(--sp2)}
+.li{padding:var(--sp3) var(--sp4);background:var(--surf2);border:1px solid var(--div);border-radius:var(--rad-lg);font-size:var(--text-sm)}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--sp3)}
+.ci{display:flex;align-items:flex-start;gap:var(--sp3);padding:var(--sp3) var(--sp4);background:var(--surf2);border:1px solid var(--div);border-radius:var(--rad-lg)}
+.ci input{margin-top:.25rem;width:17px;height:17px;accent-color:var(--pri);flex-shrink:0}
+.field{display:grid;gap:var(--sp2)}
+.input,.textarea,.sel{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--rad-md);padding:.8rem 1rem;font-size:var(--text-sm)}
+.textarea{min-height:100px;resize:vertical}
+.tw{overflow:auto;border:1px solid var(--bdr);border-radius:var(--rad-lg)}
+th,td{padding:.8rem 1rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--div);font-size:var(--text-sm)}
+th{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.05em;background:var(--surf2);font-weight:700;white-space:nowrap}
+tr:last-child td{border-bottom:none}tr:hover td{background:color-mix(in srgb,var(--pri) 3%,transparent)}
+.proto{border-left:4px solid var(--pri);padding-left:var(--sp4)}
+.cc{display:grid;gap:var(--sp2);padding:var(--sp4);border-radius:var(--rad-lg);border:1px solid var(--div);background:var(--surf2)}
+.cc strong{font-size:var(--text-sm)}
+.qr-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--sp4)}
+.qr-item{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad-lg);padding:var(--sp4);display:grid;gap:var(--sp3)}
+.qr-preview{aspect-ratio:1/1;display:grid;place-items:center;overflow:hidden;border-radius:var(--rad-md);background:var(--surf2);border:1px solid var(--div)}
+.qr-preview img{width:100%;height:100%;object-fit:contain}
+.drug-type-bar{display:flex;gap:var(--sp2);flex-wrap:wrap;margin-bottom:var(--sp4)}
+.drug-type-btn{padding:.65rem .95rem;border-radius:var(--rad-f);background:var(--surf2);border:1px solid var(--bdr);font-size:var(--text-xs);font-weight:800;transition:all var(--trans);cursor:pointer}
+.drug-type-btn:hover,.drug-type-btn.active{background:var(--prihl);color:var(--pri);border-color:var(--pri)}
+.drug-thumb{width:80px;height:80px;border-radius:var(--rad-md);border:2px dashed var(--bdr);background:var(--surf2);display:grid;place-items:center;overflow:hidden;cursor:pointer;position:relative;transition:all var(--trans)}
+.drug-thumb:hover{border-color:var(--pri);background:var(--prihl)}
+.drug-thumb.has-image{border-style:solid;border-color:var(--bdr)}
+.drug-thumb img{width:100%;height:100%;object-fit:contain}
+.drug-edit-icon{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--txm);pointer-events:none}
+.drug-edit-icon svg{opacity:.5}
+.drug-edit-icon span{font-size:9px;color:var(--txm)}
+.drug-chart-table input{width:100%;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad-sm);padding:.55rem .65rem;font-size:var(--text-sm)}
+.drug-chart-table textarea{width:100%;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad-sm);padding:.55rem .65rem;font-size:var(--text-sm);min-height:60px;resize:vertical}
+.protocol-chip-bar{display:flex;gap:var(--sp2);flex-wrap:wrap;margin-top:var(--sp3)}
+.protocol-chip{padding:.65rem .95rem;border-radius:var(--rad-f);background:var(--surf2);border:1px solid var(--bdr);font-size:var(--text-xs);font-weight:800;transition:all var(--trans);text-decoration:none;color:var(--tx)}
+.protocol-chip:hover{background:var(--prihl);color:var(--pri);border-color:var(--pri)}
+.protocol-card{scroll-margin-top:96px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp4);margin-bottom:var(
+--sp4)}
+.cal-month-label{font-size:var(--text-lg);font-weight:900}
+.cal-nav{display:flex;gap:var(--sp2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{font-size:var(--text-xs);font-weight:700;text-align:center;padding:var(--sp2);color:var(--txf);text-transform:uppercase;letter-spacing:.05em}
+.cal-dow.sun{color:var(--err)}
+.cal-day{min-height:70px;padding:var(--sp2);border-radius:var(--rad-md);background:var(--surf2);border:1px solid var(--div);cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:all var(--trans);position:relative}
+.cal-day:hover{border-color:var(--pri);background:var(--prihl)}
+.cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+.cal-day.today{border:2px solid var(--pri);background:var(--prihl)}
+.cal-day.holiday{background:color-mix(in srgb,var(--err) 8%,var(--surf))}
+.cal-day.sunday{background:color-mix(in srgb,var(--err) 5%,var(--surf2))}
+.cal-day.has-note{background:color-mix(in srgb,var(--suc) 8%,var(--surf2))}
+.day-num{font-size:var(--text-xs);font-weight:700;line-height:1}
+.cal-day.sunday .day-num,.cal-day.holiday .day-num{color:var(--err)}
+.cal-day.today .day-num{color:var(--pri)}
+.holiday-label{font-size:9px;line-height:1.2;color:var(--err);font-weight:700;word-break:break-word}
+.note-dot{width:6px;height:6px;border-radius:50%;background:var(--suc);margin-top:auto;align-self:flex-end}
+.nurse-holiday-label{font-size:9px;line-height:1.15;color:var(--blue);font-weight:700;word-break:break-word}
+.reminder-panel{margin-top:var(--sp5)}
+.reminder-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp3)}
+.reminder-list{display:grid;gap:var(--sp2)}
+.ritem{display:flex;align-items:flex-start;gap:var(--sp3);padding:var(--sp3) var(--sp4);background:var(--surf2);border:1px solid var(--div);border-radius:var(--rad-lg)}
+.ritem .rdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.4rem}
+.ritem-body{flex:1;min-width:0}
+.ritem-date{font-size:var(--text-xs);color:var(--txm)}
+.disease-table input[type=number]{width:52px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad-sm);padding:.4rem .5rem;text-align:center;font-size:var(--text-sm)}
+.month-total{font-weight:800;color:var(--pri)}
+.disease-table th:first-child,.disease-table td:first-child{position:sticky;left:0;z-index:2;background:var(--surf);box-shadow:1px 0 0 var(--bdr)}
+.disease-table thead th:first-child{z-index:4;background:var(--surf2)}
+.disease-table tfoot td:first-child{z-index:3;background:var(--surf2)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;place-items:center}
+.modal-bg.open{display:grid}
+.modal{background:var(--surf);border-radius:var(--rad-xl);padding:var(--sp6);width:min(520px,94vw);box-shadow:var(--sh-md);display:grid;gap:var(--sp4);max-height:90dvh;overflow-y:auto}
+.modal h3{font-size:var(--text-lg);font-weight:900}
+.fab{position:fixed;bottom:var(--sp6);right:var(--sp6);width:56px;height:56px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;box-shadow:var(--sh-md);z-index:20;transition:all var(--trans);border:none;cursor:pointer}
+.fab:hover{background:var(--prih);transform:scale(1.08)}
+.fab.hidden{display:none}
+.mobile-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-top:1px solid var(--bdr);z-index:25;padding:var(--sp1) 0 calc(var(--sp1) + env(safe-area-inset-bottom))}
+.mobile-tabbar-inner{display:grid;grid-template-columns:repeat(5,1fr)}
+.tab-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:var(--sp2) var(--sp1);font-size:9px;font-weight:700;color:var(--txm);transition:all var(--trans);border:none;background:none;cursor:pointer}
+.tab-btn svg{opacity:.5;transition:opacity var(--trans)}
+.tab-btn.active{color:var(--pri)}.tab-btn.active svg{opacity:1}
+.disclaimer{font-size:var(--text-xs);color:var(--warn);background:var(--warnhl);border:1px solid var(--warn);border-radius:var(--rad-lg);padding:var(--sp4)}
+@media(max-width:980px){
+.app{grid-template-columns:1fr}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:min(88vw,300px);transform:translateX(-100%);transition:transform var(--trans);z-index:30}
+.sidebar.open{transform:translateX(0)}
+.menu-btn{display:inline-flex!important}
+.g2,.g3,.g4{grid-template-columns:1fr}
+.content{padding:var(--sp4);padding-bottom:80px}
+.topbar{padding:var(--sp3) var(--sp4)}
+.cal-grid{gap:2px}
+.cal-day{min-height:50px;padding:var(--sp1)}
+.mobile-tabbar{display:block}
+.fab{bottom:calc(var(--sp6) + 56px)}
+}
+@media(min-width:600px) and (max-width:980px){
+.g2{grid-template-columns:repeat(2,1fr)}
+.drug-type-bar{gap:var(--sp2)}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">ircle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/><path d="M12 17v3M9.5 19.5l2.5-2.5 2.5 2.5"/></svg>
+    </div>
+    <div class="brand-text"><h1>Geriatric Front Door</h1><p>QMH AED — Daily screening support</p></div>
+  </div>
+  <div class="nav-sec">
+    <div class="nav-label">Pages</div>
+    <button class="nav-btn active" data-page="dashboard">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Dashboard
+    </button>
+    <button class="nav-btn" data-page="drugs">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Common Drug List
+    </button>
+    <button class="nav-btn" data-page="protocols">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Referral Protocols
+    </button>
+    <button class="nav-btn" data-page="gait">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">ircle cx="12" cy="5" r="2"/><path d="M12 7v5l-3 3M12 12l3 4M9 19l1-3M14 20l1-4"/></svg>Gait &amp; Movement
+    </button>
+    <button class="nav-btn" data-page="contacts">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2 4.18 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Contacts
+    </button>
+    <button class="nav-btn" data-page="education">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>QR Education
+    </button>
+    <button class="nav-btn" data-page="notes">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>NGO &amp; others
+    </button>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="page-title">
+      <h2 id="pageTitle">Dashboard</h2>
+      <div class="sub" id="pageSub">Calendar · Nurse holiday · Weekly reminders · Monthly disease data</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-sec menu-btn" id="menuBtn" style="display:none">☰ Menu</button>
+      <button class="btn btn-sec" id="themeBtn">◐ Theme</button>
+      <button class="btn btn-pri" id="todayBtn">Today</button>
+    </div>
+  </header>
+
+  <section class="content">
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="dashboard">
+      <div class="card">
+        <div class="cal-header">
+          <div class="cal-month-label" id="calMonthLabel"></div>
+          <div class="cal-nav">
+            <button class="btn btn-sec" id="calPrev">←</button>
+            <button class="btn btn-sec" id="calToday">Today</button>
+            <button class="btn btn-sec" id="calNext">→</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="reminder-panel">
+          <div class="reminder-head">
+            <div class="card-title" style="margin:0">This week: <span id="reminderMonthLabel"></span></div>
+            <button class="btn btn-pri" id="addReminderBtn">+ Add reminder</button>
+          </div>
+          <div class="reminder-list" id="reminderList"></div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Daily work schedule</div>
+          <div class="tw"><table>
+            <thead><tr><th>Time</th><th>Work item</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Mon–Fri 0900–0930</td><td>Phone FU</td><td>Follow-up calls and review pending cases</td></tr>
+              <tr><td>Mon–Fri 0930–1130</td><td>In AED</td><td>Elderly screening, assessment, education, support and referral</td></tr>
+              <tr><td>Mon–Fri 1130–1300</td><td>Back to ICDS office</td><td>Documentation, coordination, follow-up</td></tr>
+              <tr><td>Mon–Fri 1300–1400</td><td>Lunch</td><td>Break</td></tr>
+              <tr><td>Mon–Fri 1400–1530</td><td>Data entry / admin</td><td>Case documentation, referral processing</td></tr>
+              <tr><td>Long week 1530–1700</td><td>Data entry / admin</td><td>
+              Finish documentation until 17:00</td></tr>
+              <tr><td>Short week 1530–1748</td><td>Data entry / admin</td><td>Finish documentation until 17:48</td></tr>
+              <tr><td>Sat 0900–1300</td><td>In ICDS office</td><td>Office duty, follow-up, referral coordination</td></tr>
+              <tr><td>Long PH Sat 0930–1130</td><td>In AED</td><td>Support during Christmas, CNY and Easter long PH Saturday</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Editable reminder board</div>
+          <p class="tiny muted" style="margin-bottom:var(--sp3)">Content autosaves in your browser.</p>
+          <div class="field">
+            abel class="tiny">Today reminder</label>
+            <textarea class="textarea" id="autosaveReminder" placeholder="- Call family clinic for follow-up&#10;- Check NGO referral form&#10;- Review QR code materials"></textarea>
+          </div>
+          <div class="g2" style="margin-top:var(--sp4)">
+            <div class="kpi"><div class="k-label">Autosave status</div><div class="k-val" id="autosaveStatus" style="font-size:var(--text-lg)">Saved</div></div>
+            <div class="kpi"><div class="k-label">Last update</div><div class="k-val" id="autosaveTime" style="font-size:var(--text-lg)">--:--</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cal-header">
+          <div class="card-title" style="margin:0">Monthly geriatric disease data collection</div>
+          <div style="display:flex;gap:var(--sp2);align-items:center">
+            <select class="sel" id="diseaseMonth" style="width:auto;padding:.5rem .8rem"></select>
+            <button class="btn btn-pri" id="exportCsvBtn">Export CSV</button>
+          </div>
+        </div>
+        <p class="tiny muted" style="margin-bottom:var(--sp4)">Enter daily case count for each condition. Totals calculated automatically.</p>
+        <div class="tw disease-table">
+          <table id="diseaseTable">
+            <thead id="diseaseHead"></thead>
+            <tbody id="diseaseBody"></tbody>
+            <tfoot id="diseaseFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRUGS PAGE -->
+    <div class="page" id="drugs">
+      <div class="card">
+        <div class="card-title">Common Drug List</div>
+        <div class="drug-type-bar" id="drugTypeBar"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sp3);margin-bottom:var(--sp4)">
+          <div>
+            <div class="card-title" id="activeDrugTitle" style="margin:0"></div>
+            <div class="tiny" id="activeDrugSubtitle"></div>
+          </div>
+          <div style="display:flex;gap:var(--sp2);flex-wrap:wrap">
+            <button class="btn btn-sec" id="addDrugRowBtn" type="button">+ Add blank drug</button>
+            abel class="btn btn-pri" for="activeDrugUpload" style="cursor:pointer">Upload drug picture</label>
+            <input id="activeDrugUpload" type="file" accept="image/*" multiple hidden>
+            <input id="drugCellUpload" type="file" accept="image/*" hidden>
+          </div>
+        </div>
+        <div class="tw">
+          <table class="drug-chart-table">
+            <thead>
+              <tr>
+                <th style="min-width:160px">Drug name</th>
+                <th style="min-width:180px">Brand / strength</th>
+                <th style="min-width:90px">Drug picture</th>
+                <th style="min-width:280px">Main use / teaching point</th>
+              </tr>
+            </thead>
+            <tbody id="drugChartBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROTOCOLS PAGE -->
+    <div class="page" id="protocols">
+      <div class="card">
+        <div class="card-title">Referral Protocols</div>
+        <div class="protocol-chip-bar">
+          <a class="protocol-chip" href="#proto-1">Fast Track</a>
+          <a class="protocol-chip" href="#proto-2">GDH</a>
+          <a class="protocol-chip" href="#proto-3">Advancing SOPD</a>
+          <a class="protocol-chip" href="#proto-4">QMH Clinic FU</a>
+          <a class="protocol-chip" href="#proto-5">PGT</a>
+          <a class="protocol-chip" href="#proto-6">CGAT</a>
+          <a class="protocol-chip" href="#proto-7">CVMO</a>
+          <a class="protocol-chip" href="#proto-8">ICDS / IDSP</a>
+          <a class="protocol-chip" href="#proto-9">PSCC</a>
+          <a class="protocol-chip" href="#proto-10">CNS</a>
+          <a class="protocol-chip" href="#proto-11">GOPC</a>
+          <a class="protocol-chip" href="#proto-12">Palliative</a>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-1">
+        <div class="card-title">1. Fast Track Clinic in FYKH</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring Fast Track Clinic in FYKH.</div>
+          <div class="li">Contact FYKH GDH nurse for Fast Track Clinic appointment, Tel: 2855 6177.</div>
+          <div class="li">Fax GaFD referral form (Appendix 18), filled and endorsed by Geriatrician, to GDH. Fax: 2855 6169.</div>
+          <div class="li">GDH clerk books clinic, confirms with Geriatrician, faxes reply slip to ICDS office Fax: 2986 3192, and contacts GEM nurse.</div>
+          <div class="li">GEM nurse notifies patient of confirmed appointment with self-arranged transport.</div>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-2">
+        <div class="card-title">2. Geriatric Day Hospital (FYKH / TWH)</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring GDH in FYKH or TWH.</div>
+          <div class="li">FYKH GDH Tel: 2855 6177 · TWH GDH Tel: 2589 8178.</div>
+          <div class="li">Fax GaFD GDH referral form (Appendix 18) endorsed by Geriatrician. FYKH Fax: 2855 6169 · TWH Fax: 2546 5510.</div>
+          <div class="li">GDH clerk books appointment, faxes reply slip to ICDS office Fax: 2986 3192.</div>
+          <div class="li">GEM nurse informs patient of confirmed GDH appointment with self-arranged transport.</div>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-3">
+        <div class="card-title">3. Advancing SOPD Appointment</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring advancing SOPD appointment.</div>
+          <div class="li">Contact SOPD (QMH / GH / TWH) by fax with referral form (Appendix 18) endorsed by Geriatrician, plus doctor referral letter.</div>
+          <div class="li">For memory / fall / nutritional clinic in QMH, contact QMH geriatric nurse directly for advancing booking.</div>
+          <div class="li">Early appointment will be arranged by SOPD, then GEM nurse informs patient by phone.</div>
+        </div>
+        <div class="g2" style="margin-top:var(--sp4)">
+          <div class="cc"><strong>QMH</strong><div class="tiny">Medicine (S6), Fall / memory clinic</div><div class="tiny">Fax: 2255 3018</div><div class="tiny">Tel: 2255 3375 / 2255 1567 / 2255 1242 / 7306 9037</div></div>
+          <div class="cc"><strong>GH / TWH</strong><div class="tiny">GH SOPD Tel: 2518 2266, Fax: 2518 6700</div><div class="tiny">TWH SOPD Tel: 2589 8608, Fax: 2291 0315</div></div>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-4">
+        <div class="card-title">4. Early Follow-up in QMH Geriatric Clinics</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring early follow-up in QMH Geriatric appointment.</div>
+          <div class="li">Contact QMH Geriatric clinic (Medicine S6) by fax using referral form (Appendix 18) endorsed by Geriatrician.</div>
+          <div class="li">New Geriatric appointment A/V should be within 2 weeks.</div>
+          <div class="li">GEM nurse informs patient about advanced Geriatric clinic appointment.</div>
+        </div>
+        <div class="cc" style="margin-top:var(--sp4)"><strong>QMH Medicine (S6)</strong><div class="tiny">Fax: 2255 3018</div><div class="tiny">Tel: 2255 3375 / 2255 1242</div></div>
+      </div>
+
+      <div class="card protocol-card" id="proto-5">
+        <div class="card-title">5. Referral to Psychogeriatric Outreach Service Team (PGT)</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring early discharge support and psychogeriatric intervention in RCHE.</div>
+          <div class="li">Contact APN in Psychogeriatric Outreach Service Team.</div>
+          <div class="li">Fax conjoint care plan (Appendix 4) to PGT office, Fax: 2559 0217.</div>
+          <div class="li">GEM nurse gives brief clinical handover to respective APN.</div>
+        </div>
+        <div class="cc" style="margin-top:var(--sp4)"><strong>DTRC Psychogeriatric Outreach Service Team</strong><div class="tiny">Tel: 2517 8149 · Mobile: 9789 0601 · Fax: 2559 0217</div></div>
+      </div>
+
+      <div class="card protocol-card" id="proto-6">
+        <div class="card-title">6. Referral to CGAT</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring early discharge support in RCHE.</div>
+          <div class="li">Contact APN in CGAT office. FYKH CGAT Tel: 2855 6144.</div>
+          <div class="li">Fax conjoint care plan (Appendix 4) to CGAT office, Fax: 2872 4132.</div>
+          <div class="li">GEM nurse gives brief clinical handover to respective APN.</div>
+        </div>
+        <div class="g2" style="margin-top:var(--sp4)">
+          <div class="cc"><strong>CGAT office</strong><div class="tiny">APN Ms. Fung Lai Yee / APN Ms. Lam Wai Heung</div><div class="tiny">Tel: 2855 6144 · Fax: 2872 4132</div></div>
+          <div class="cc"><strong>CNS centers</strong><div class="tiny">ABD: APN Ms. Grace LAU / APN HO Wing Shan, Tel: 2518 4198</div><div class="tiny">TYH: APN Ms. CHAN Shuk Ling / ANC Ms. Celia WONG, Tel: 2589 2284</div></div>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-7">
+        <div class="card-title">7. Referral to CVMO (RCHE CGAT old cases only)</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring post-discharge follow-up by CVMO.</div>
+          <div class="li">Contact APN in CGAT office. FYKH CGAT Tel: 2855 6144.</div>
+          <div class="li">Fax conjoint care plan (Appendix 4) to CGAT office, Fax: 2872 4132.</div>
+        </div>
+        <div class="g2" style="margin-top:var(--sp4)">
+          <div class="cc"><strong>FYKH CGAT office</strong><div class="tiny">APN Ms. Fung Lai Yee / APN Ms. Lam Wai Heung</div><div class="tiny">Tel: 2855 6144 · Fax: 2872 4132</div></div>
+          <div class="cc"><strong>WFCC CGAT office</strong><div class="tiny">ANC Ms. Chan Suk Fai</div><div class="tiny">Tel: 2550 8268 · Fax: 2875 0966</div></div>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-8">
+        <div class="card-title">8. New Case / Active Case to ICDS / IDSP</div>
+        <div class="list">
+          <div class="li">GEM nurse performs CGA and identifies case status requiring ICDS / IDSP.</div>
+          <div class="li">New ICDS / IDSP case referral (Non-EMW): GEM nurse performs ICM ADPF assessment.</div>
+          <div class="li">For new case, fax conjoint care plan and ICDS / IDSP referral (Appendix 21), contact ICDS link nurse / IDSP clerk.</div>
+          <div class="li">For active case, identify status and coordinate post-discharge service; fax conjoint care plan to ICDS office if needed.</div>
+        </div>
+        <div class="g2" style="margin-
+        top:var(--sp4)">
+          <div class="cc"><strong>QMH ICDS office</strong><div class="tiny">Tel: 2255 6743 · Fax: 2986 3192</div></div>
+          <div class="cc"><strong>Link nurse</strong><div class="tiny">APN Ms. WONG Ka Wah · APN Mr. Jimmy Lew</div><div class="tiny">Tel: 2255 1207 / 2255 1712 · Fax: 2986 3192</div></div>
+        </div>
+      </div>
+
+      <div class="card protocol-card" id="proto-9">
+        <div class="card-title">9. PSCC (HRE) Support / Referral</div>
+        <div class="list">
+          <div class="li">GEM nurse verifies patient's High-Risk Elderly (HRE) status in CMS.</div>
+          <div class="li">GEM nurse contacts PSCC hotline for further handover if needed.</div>
+          <div class="li">GEM nurse reminds patient / caregiver to call PSCC hotline for support.</div>
+          <div class="li">If necessary, suggest PSCC nurse to refer patient to CNS in local cluster.</div>
+        </div>
+        <div class="cc" style="margin-top:var(--sp4)"><strong>PSCC hotline</strong><div class="tiny">Tel: 2996 2333</div></div>
+      </div>
+
+      <div class="card protocol-card" id="proto-10">
+        <div class="card-title">10. Referral to CNS</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring community nursing service support after discharge.</div>
+          <div class="li">For active case: fax conjoint care plan (Appendix 4) to liaison office.</div>
+          <div class="li">For new case: fax conjoint care plan and CNS referral via CMS to liaison office. Payment should be agreed by patient / relative before referring.</div>
+          <div class="li">GEM nurse acknowledges referral with HKWC liaison office and gives brief clinical handover.</div>
+        </div>
+        <div class="cc" style="margin-top:var(--sp4)"><strong>HKWC CNS liaison office</strong><div class="tiny">ANC Ms. Celia WONG</div><div class="tiny">Tel: 2589 2300 · Fax: 2540 4899</div></div>
+      </div>
+
+      <div class="card protocol-card" id="proto-11">
+        <div class="card-title">11. GOPC Appointment</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for patient requiring GOPC force-in quota booking.</div>
+          <div class="li">GEM nurse makes booking via Interactive Voice Appointment System (IVAS).</div>
+          <div class="li">If IVAS quota is full, contact GOPC nurse I/C for forced-in quota booking and fax referral.</div>
+          <div class="li">GEM nurse informs patient about the GOPC appointment with self-arranged transport.</div>
+        </div>
+        <div class="tw" style="margin-top:var(--sp4)"><table>
+          <thead><tr><th>Name of GOPC</th><th>IVAS booking number</th><th>Office Tel</th><th>Fax</th></tr></thead>
+          <tbody>
+            <tr><td>Ap Lei Chau GOPC</td><td>3543 5022</td><td>2518 5607</td><td>2580 5493</td></tr>
+            <tr><td>Central District Health Center GOPC</td><td>3543 5033</td><td>2545 1485</td><td>2851 3631</td></tr>
+            <tr><td>Kennedy Town Jockey Club GOPC</td><td>3543 5088</td><td>2817 3215</td><td>2819 8756</td></tr>
+            <tr><td>Aberdeen Jockey Club GOPC</td><td>3543 5011</td><td>2555 0381</td><td>2553 9553</td></tr>
+            <tr><td>Sai Yun Pun Jockey Club GOPC</td><td>3543 5000</td><td>2859 8203</td><td>2517 4012</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card protocol-card" id="proto-12">
+        <div class="card-title">12. Palliative Home Care Services (old case)</div>
+        <div class="list">
+          <div class="li">GEM nurse consults Geriatrician for palliative patient requiring early discharge support.</div>
+          <div class="li">Contact NC (Palliative) for updating information. Office: 2518 2690 / Pager: 7472 2145.</div>
+          <div class="li">Fax conjoint care plan (Appendix 4) and standard referral form to GH Palliative office, Fax: 2873 2767.</div>
+          <div class="li">GEM nurse gives brief clinical handover to NC (Palliative) or respective APN.</div>
+        </div>
+        <div class="cc" style="margin-top:var(--sp4)"><strong>GH Palliative Home Care Service Team</strong><div class="tiny">NC (Palliative): Mr K W Tsang</div><div class="tiny">Office: 2518 2235 / 2518 2690 · Pager: 7472 2145 · Fax: 2873 2767</div></div>
+      </div>
+    </div>
+
+    <!-- GAIT PAGE -->
+    <div class="page" id="gait">
+      <div class="card"><div class="card-title">Gait / Posture / Movement Descriptions</div></div>
+
+      <div class="card">
+        <div class="card-title">Gait</div>
+        <div class="tiny muted" style="margin-bottom:var(--sp3)">Short objective phrases for gait observation and handover.</div>
+        <div class="tw"><table>
+          <thead><tr><th style="min-width:200px">Description</th><th style="min-width:300px">Useful wording</th><th style="min-width:220px">Clinical concern</th></tr></thead>
+          <tbody>
+            <tr><td>Slow shuffling gait</td><td>Short steps, reduced foot clearance, turns en bloc</td><td>Frailty, parkinsonism, fall risk</td></tr>
+            <tr><td>Broad-based gait</td><td>Widened stance for balance compensation</td><td>Balance impairment, cerebellar or sensory issue</td></tr>
+            <tr><td>Antalgic gait</td><td>Reduced weight bearing on painful limb</td><td>Pain, fracture, arthritis flare</td></tr>
+            <tr><td>Freezing / hesitant start</td><td>Difficulty initiating first step, hesitates at doorway</td><td>Parkinsonian feature, fear of falling</td></tr>
+            <tr><td>Reduced foot clearance</td><td>Feet barely clear the floor, toe may catch ground</td><td>Trips, fall risk, weakness</td></tr>
+            <tr><td>Irregular step rhythm</td><td>Variable step length, hesitant cadence</td><td>Neurological cause, severe frailty</td></tr>
+            <tr><td>Veers to one side</td><td>Drifts left or right while walking</td><td>Vestibular issue, weakness, neglect</td></tr>
+            <tr><td>Foot drop pattern</td><td>High stepping or toe dragging during swing phase</td><td>Neuropathy, stroke, nerve palsy, fall risk</td></tr>
+            <tr><td>Very cautious gait</td><td>Walks slowly with over-guarding and reluctance to step</td><td>Low confidence, recent fall, anxiety</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Posture</div>
+        <div class="tiny muted" style="margin-bottom:var(--sp3)">Postural alignment and movement pattern observations.</div>
+        <div class="tw"><table>
+          <thead><tr><th style="min-width:200px">Description</th><th style="min-width:300px">Useful wording</th><th style="min-width:220px">Clinical concern</th></tr></thead>
+          <tbody>
+            <tr><td>Stooped posture</td><td>Flexed trunk, forward head, reduced spinal extension</td><td>Parkinsonism, kyphosis, deconditioning</td></tr>
+            <tr><td>Kyphotic posture</td><td>Increased thoracic curvature with forward trunk posture</td><td>Osteoporosis, chronic pain, deconditioning</td></tr>
+            <tr><td>Forward head posture</td><td>Head projects anteriorly, poor upright alignment</td><td>Weak postural muscles, chronic musculoskeletal strain</td></tr>
+            <tr><td>Reduced arm swing</td><td>Asymmetric or absent arm swing during walking</td><td>Parkinsonism, hemiplegia, pain</td></tr>
+            <tr><td>Guarded movement</td><td>Moves slowly, braces limb, avoids full range due to pain</td><td>Acute injury, fracture, severe osteoarthritis</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Transfer</div>
+        <div class="tiny muted" style="margin-bottom:var(--sp3)">Sit-to-stand, rolling, repositioning and support needs.</div>
+        <div class="tw"><table>
+          <thead><tr><th style="min-width:200px">Description</th><th style="min-width:300px">Useful wording</th><th style="min-width:220px">Clinical concern</th></tr></thead>
+          <tbody>
+            <tr><td>One-person assist needed</td><td>Requires cueing and physical support to stand</td><td>Unsafe discharge without supervision</td></tr>
+            <tr><td>Pushes off with both arms</td><td>Requires upper limb support to rise from chair</td><td>Weak lower limb power, deconditioning</td></tr>
+            <tr><td>Slow to rise from chair</td><td>Delayed sit-to-stand, effortful movement, uses momentum</td><td>Frailty, weakness, pain, deconditioning</td></tr>
+            <tr><td>Poor transfer sequencing</td><td>Forgets brakes, hand placement, or turning sequence</td><td>Cognitive issue, delirium, unsafe discharge</td></tr>
+            <tr><td>Difficulty rolling or repositioning</td><td>Needs assistance to turn or move in bed</td><td>Functional decline, weakness, pain</td></tr>
+            <tr><td>Requires two-person assist</td><td>Needs support from two staff for safe mobilization</td><td>Severe mobility impairment, unsafe discharge</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Balance</div>
+        <div class="tiny muted" style="margin-bottom:var(--sp3)">Standing control, turning and falls-risk observations.</div>
+        <div class="tw"><table>
+          <thead><tr><th style="min-width:200px">Description</th><th style="min-width:300px">Useful wording</th><th style="min-width:220px">Clinical concern</th></tr></thead>
+          <tbody>
+            <tr><td>Unsteady on turning</td><td>Grabs nearby support during pivot or change of direction</td><td>High falls risk</td></tr>
+            <tr><td>Sways during standing or walking</td><td>Visible trunk sway, poor midline stability</td><td>Core weakness, sensory loss, balance impairment</td></tr>
+            <tr><td>Unable to stand unsupported</td><td>Needs handhold, frame, or person support while standing</td><td>High falls risk, unsafe discharge</td></tr>
+            <tr><td>Knee instability on walking</td><td>Knee buckles, hyperextends, or appears shaky</td><td>Weak quadriceps, stroke, pain</td></tr>
+            <tr><td>Poor weight transfer</td><td>Difficulty shifting weight from one leg to the other</td><td>Stroke, pain, weakness, balance problem</td></tr>
+            <tr><td>Stops walking when talking</td><td>Gait slows or stops when answering questions</td><td>High falls risk, reduced executive function</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Mobility</div>
+        <div class="tiny muted" style="margin-bottom:var(--sp3)">Walking aid use, endurance, stairs and community mobility.</div>
+        <div class="tw"><table>
+          <thead><tr><th style="min-width:200px">Description</th><th style="min-width:300px">Useful wording</th><th style="min-width:220px">Clinical concern</th></tr></thead>
+          <tbody>
+            <tr><td>Incorrect frame technique</td><td>Frame too far ahead, poor sequencing, forgets aid</td><td>Needs physio assessment / education</td></tr>
+            <tr><td>Fatigues after short distance</td><td>Needs frequent rests after a few metres</td><td>Frailty, cardiopulmonary limitation</td></tr>
+            <tr><td>Turns with multiple small steps</td><td>Needs several steps to pivot, slow turning movement</td><td>Balance deficit, parkinsonism</td></tr>
+            <tr><td>Unsafe on uneven ground</td><td>Manages flat floor only, unstable on curb or slope</td><td>Community mobility limitation, fall risk</td></tr>
+            <tr><td>Unable to negotiate stairs safely</td><td>Needs rail and assistance, poor foot placement</td><td>Discharge barrier if home has stairs</td></tr>
+            <tr><td>Furniture walking</td><td>Uses wall, bedrail, chair, or furniture to steady self</td><td>Unrecognized mobility impairment, fall risk</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div style="text-align:center;padding:var(--sp4);color:var(--txf)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto var(--sp2)">ircle cx="12" cy="5" r="2"/><path d="M12 7v5l-3 3M12 12l3 4M9 19l1-3M14 20l1-4"/></svg>
+        <div class="tiny">Gait &amp; Movement</div>
+      </div>
+ 改善家居及社區照顧服務</div>
+          <div class="tw"><table>
+            <thead><tr><th>地區</th><th>機構</th><th>地址</th><th>電話</th></tr></thead>
+            <tbody>
+              <tr><td>中西區</td><td>聖雅各福群會</td><td>西環干諾道西 188 號香港商業中心 7 樓 13AB</td><td>2817 7839</td></tr>
+              <tr><td>南區</td><td>香港仔街坊會</td><td>香港仔石排灣邨停車場低層二樓 1 號</td><td>2555 3466</td></tr>
+              <tr><td rowspan="3">離島</td><td>香港家庭福利會</td><td>坪洲金坪邨金坪樓地下 N10B 室</td><td>2559 7773</td></tr>
+              ...
+            </tbody>
+          </table></div>
+        </div>
+        ...
+        <!-- Mobile tab bar, modals, HK holidays, pageMeta, DRUG_CATEGORIES (Cardiovascular, Diabetes...) -->
+nes / Allergy', subtitle:'Common antihistamines.', items:[
+    {drug:'Chlorpheniramine', brand:'Piriton (4mg)', use:'First-generation antihistamine; may cause drowsiness and fatigue.', image:''},
+    {drug:'Hydroxyzine HCl', brand:'Atarax (10/25mg)', use:'First-generation antihistamine; may cause drowsiness and fatigue.', image:''},
+    {drug:'Loratadine', brand:'Clarityne (10mg)', use:'Second-generation antihistamine; less likely to cause drowsiness.', image:''},
+    {drug:'Cetirizine', brand:'Zyrtec (10mg)', use:'Second-generation antihistamine; less likely to cause drowsiness.', image:''},
+    {drug:'Fexofenadine', brand:'Telfast (120/180mg)', use:'Second-generation antihistamine; non-drowsy.', image:''}
+  ]},
+  gi:{label:'Antacid / Laxatives', ...},
+  urology:{label:'Urology', ...},
+  psych:{label:'Psychiatry / Dementia', ...},
+  parkinsons:{label:"Parkinson's Disease", ...},
+  respiratory:{label:'Respiratory / Asthma / COPD', ...}
+};
+
+const MOBILITY_META = { gait, posture, transfer, balance, mobility ... };
+const MOBILITY_DATA = { gait:[...], posture:[...], transfer:[...], balance:[...], mobility:[...] };
+
+const importedContacts = [
+  {name:'QMH NS-108 ICDS Office', phone:'2255 6741 / 6742 / 6743', ...},
+  {name:'Ms. Kara WONG', service:'APN / CCS', phone:'2255 6741 / 2255 1207', ...},
+  ...
+];
+
+const calendarEntries = {};
+const today = new Date();
+let calYear = today.getFullYear();
+let calMonth = today.getMonth();
+const diseaseData = {};
+const DISEASES = ['Falls / Injury','Delirium','Dementia','Heart Failure','Pneumonia',
+  'UTI / Sepsis','Stroke / TIA','Frailty','Osteoporosis / #NOF','Polypharmacy'];
+  if(pageKey==='drugs'){ renderDrugButtons(); renderDrugTable(); }
+  if(pageKey==='gait'){ renderMobilityButtons(); renderMobilityTable(); }
+  syncFab(pageKey);
+}
+document.querySelectorAll('.nav-btn[data-page], #mobileTabbar [data-page]')
+  .forEach(btn=>btn.addEventListener('click',()=>activatePage(btn.dataset.page)));
+
+function renderCalendar(){
+  document.getElementById('calMonthLabel').textContent = `${monthNames[calMonth]} ${calYear}`;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='cal-dow'+(i===0?' sun':'');
+    el.textContent=d; grid.appendChild(el);
+  });
+  // ... builds calendar days, holidays, nurse-leave markers, note dots
+  renderReminders();
+}
+
+function renderReminders(){
+  // Shows this week's reminders under the calendar
+  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()-diffToMonday);
+  const weekEnd   = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()+6);
+  // ... iterates calendarEntries and displays items
+}
+
+function renderDiseaseTable(){
+  // Builds the monthly disease-count table (Falls, Delirium, Dementia, etc.)
+  // Each cell is an <input type="number"> bound to diseaseData[mk][dis][day]
+  // Row totals, day totals and grand total update live on input
+}
+document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+  // Exports current month's disease table as CSV
+});
+
+function renderDrugButtons(){
+  const bar = document.getElementById('drugTypeBar');
+  if(!bar) return;
+  bar.innerHTML='';
+  Object.entries(DRUG_CATEGORIES).forEach(([key,val])=>{
+    const b=document.createElement('button');
+    b.className='drug-type-btn'+(key===activeDrugCategory?' active':'');
+    b.textContent=val.label;
+    b.type='button';
+    b.addEventListener('click',()=>{ activeDrugCategory=key; renderDrugButtons(); renderDrugTable(); });
+    bar.appendChild(b);
+  });
+}
+// Drug picture upload per row
+const drugCellUpload = document.getElementById('drugCellUpload');
+if(drugCellUpload){
+  drugCellUpload.addEventListener('change',e=>{
+    const file=e.target.files[0];
+    if(!file || !pendingDrugThumb) return;
+    const reader=new FileReader();
+    reader.onload=()=>{ pendingDrugThumb.image=reader.result; renderDrugTable(); pendingDrugThumb=null; };
+    reader.readAsDataURL(file);
+    e.target.value='';
+  });
+}
+
+// Gait / Mobility table
+function renderMobilityButtons(){ ... }
+function renderMobilityTable(){ ... }
+
+// Contacts
+function createContactCard(name, service, phone, notes){ ... }
+importedContacts.forEach(c=>createContactCard(c.name,c.service,c.phone,c.notes));
+document.getElementById('addContactBtn').addEventListener('click',()=>createContactCard());
+document.getElementById('contactSearch').addEventListener('input', e=>{ ... });
+
+// QR Education cards
+function createQrCard(imageSrc, title, desc){ ... }
+document.getElementById('addBlankQrBtn').addEventListener('click',()=>createQrCard());
+document.getElementById('qrUploader').addEventListener('change', e=>{ ... });
+
+// NGO Notes
+saveNoteBtn.addEventListener('click', ()=>{ ... });
+clearNoteBtn.addEventListener('click', ()=>{ ... });
+
+// Init
+renderCalendar();
+renderDiseaseTable();
+renderDrugButtons();
+renderDrugTable();
+renderMobilityButtons();
+renderMobilityTable();
+syncFab('dashboard');
+</script>
+
+<!-- FAB button (Contacts/NGO pages only) -->
+<button class="fab" id="fabBtn" type="button" aria-label="Add new entry">
+  <svg viewBox="0 0 24 24">...</svg>
+</button>
+
+<!-- Add New Entry modal -->
+<div class="add-modal" id="addModal" role="dialog" aria-modal="true">
+  <div class="add-modal-box">
+    <h3>Add New Entry</h3>
+    <!-- Type: NGO / Internal contact / Quick note -->
+    <!-- Fields: Name/Organisation, Phone, District/Category, Address, Note -->
+    <button id="addModalSave">Add</button>
+    <button id="addModalCancel">Cancel</button>
+  </div>
+</div>
+
+<script>
+// FAB modal open/close logic
+fab.addEventListener('click', openModal);
+bgOverlay.addEventListener('click', closeModal);
+saveBtn.addEventListener('click', function(){ ... });
+</script>
+</body>
+</html>
+    
+
+
