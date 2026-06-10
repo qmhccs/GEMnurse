@@ -1182,12 +1182,12 @@ document.getElementById('contactSearch').addEventListener('input',e=>{
 function createQrCard(imageSrc='', title='New QR code', desc='Type description here...'){
   const card=document.createElement('div'); card.className='qr-item';
   card.innerHTML=`<div class="qr-preview">${imageSrc ? `<img src="${imageSrc}" alt="QR code" loading="lazy">` : `<div class="tiny" style="text-align:center;padding:1rem">No QR image uploaded</div>`}</div><input class="input" value="${title}" aria-label="QR title"><textarea class="textarea" style="min-height:72px" placeholder="Description...">${desc}</textarea><button class="btn btn-sec remove-qr-btn" type="button">Remove card</button>`;
-  card.querySelector('.remove-qr-btn').addEventListener('click',()=>card.remove());
+  card.querySelector('.remove-qr-btn').addEventListener('click',()=>{card.remove();if(window.firebaseRealtime)window.firebaseRealtime.scheduleSave();});   card.querySelector('input').addEventListener('input',()=>{if(window.firebaseRealtime)window.firebaseRealtime.scheduleSave();});   card.querySelector('textarea').addEventListener('input',()=>{if(window.firebaseRealtime)window.firebaseRealtime.scheduleSave();});
   document.getElementById('qrGallery').appendChild(card);
 }
 document.getElementById('addBlankQrBtn').addEventListener('click',()=>createQrCard());
 document.getElementById('qrUploader').addEventListener('change',e=>{
-  [...e.target.files].forEach(file=>{ const reader=new FileReader(); reader.onload=()=>createQrCard(reader.result,file.name.replace(/\.[^/.]+$/,''),'Type description here...'); reader.readAsDataURL(file); });
+  [...e.target.files].forEach(file=>{ const reader=new FileReader(); reader.onload=()=>{createQrCard(reader.result,file.name.replace(/\.[^/.]+$/,''),'Type description here...');if(window.firebaseRealtime)window.firebaseRealtime.scheduleSave();}; reader.readAsDataURL(file); });
   e.target.value='';
 });
 
@@ -1352,7 +1352,7 @@ function collectState(){
     reminderMemory: window.reminderMemory || '',
     diseaseData: window.diseaseData || {},
     drugCategories: window.DRUG_CATEGORIES || {},
-    activeDrugCategory: window.activeDrugCategory || 'cardiovascular'
+    activeDrugCategory: window.activeDrugCategory || 'cardiovascular',     qrItems: [...(document.getElementById('qrGallery')?document.getElementById('qrGallery').querySelectorAll('.qr-item'):[]  )].map(c=>({img:(c.querySelector('img')||{src:''}).src,title:(c.querySelector('input')||{value:''}).value,desc:(c.querySelector('textarea')||{value:''}).value}))
   };
 }
 
@@ -1371,7 +1371,7 @@ function applyState(state){
   if(typeof window.renderCalendar === 'function') window.renderCalendar();
   if(typeof window.renderDiseaseTable === 'function') window.renderDiseaseTable();
   if(typeof window.renderDrugButtons === 'function') window.renderDrugButtons();
-  if(typeof window.renderDrugTable === 'function') window.renderDrugTable();
+  if(typeof window.renderDrugTable === 'function') window.renderDrugTable();   if(state.qrItems && Array.isArray(state.qrItems)){const g=document.getElementById('qrGallery');if(g){g.innerHTML='';state.qrItems.forEach(q=>createQrCard(q.img,q.title,q.desc));}}
   setTimeout(()=>{ suppressRemoteSave = false; }, 200);
 }
 
