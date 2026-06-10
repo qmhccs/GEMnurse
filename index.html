@@ -721,7 +721,7 @@ const pageMeta = {
   notes:{title:'NGO & Others', sub:'Community resources and your quick notes'}
 };
 
-const DRUG_CATEGORIES = {
+window.DRUG_CATEGORIES = {
   cardiovascular:{label:'Cardiovascular', subtitle:'Common cardiovascular medicines.', items:[
     {drug:'Amlodipine', brand:'Norvasc (5/10mg)', use:'Calcium channel blocker for hypertension.', image:''},
     {drug:'Atenolol', brand:'Tenormin (50mg)', use:'Beta blocker; slows heart rate and lowers blood pressure.', image:''},
@@ -865,17 +865,17 @@ const importedContacts = [
   {name:'FYKH GDH', service:'Geriatric Day Hospital', phone:'2855 6177', notes:'Fax: 2855 6169'}
 ];
 
-const calendarEntries = {};
+window.calendarEntries = {};
 const today = new Date();
 let calYear = today.getFullYear();
 let calMonth = today.getMonth();
-const diseaseData = {};
+window.diseaseData = {};
 const DISEASES = ['Falls / Injury','Delirium','Dementia','Heart Failure','Pneumonia','UTI / Sepsis','Stroke / TIA','Frailty','Osteoporosis / #NOF','Polypharmacy'];
 const MONTHS_LIST = [];
 for(let y=2026;y<=2027;y++){ for(let m=0;m<12;m++){ MONTHS_LIST.push({year:y,month:m,label:new Date(y,m,1).toLocaleString('en-HK',{month:'long',year:'numeric'})}); }}
 let dark = window.matchMedia('(prefers-color-scheme:dark)').matches;
-let reminderMemory = '';
-let activeDrugCategory = 'cardiovascular';
+window.reminderMemory = '';
+window.activeDrugCategory = 'cardiovascular';
 let pendingDrugThumb = null;
 let activeMobilityType = 'gait';
 
@@ -911,7 +911,7 @@ document.querySelectorAll('.nav-btn[data-page], #mobileTabbar [data-page]').forE
 document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
 document.getElementById('todayBtn').addEventListener('click',()=>{ calYear=today.getFullYear(); calMonth=today.getMonth(); renderCalendar(); });
 
-function renderCalendar(){
+window.renderCalendar = function renderCalendar(){
   document.getElementById('calMonthLabel').textContent = `${monthNames[calMonth]} ${calYear}`;
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
@@ -964,7 +964,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   const type = document.getElementById('modalType').value;
   const pri = document.getElementById('modalPriority').value;
   if(!calendarEntries[modalKey]) calendarEntries[modalKey] = [];
-  calendarEntries[modalKey].push({type,text:txt,priority:pri});
+  calendarEntries[modalKey].push({type,text:txt,priority:pri}); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
   document.getElementById('modalBg').classList.remove('open');
   renderCalendar();
 });
@@ -1001,13 +1001,13 @@ function renderReminders(){
         <button class="btn btn-sec" style="padding:.25rem .6rem;font-size:.75rem;color:var(--err)" data-del-date="${date}" data-del-idx="${i}">Delete</button>
       </div>`;
     row.querySelector('[data-del-date]').addEventListener('click',()=>{
-      calendarEntries[date].splice(i,1);
+      calendarEntries[date].splice(i,1); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
       if(!calendarEntries[date].length) delete calendarEntries[date];
       renderCalendar();
     });
     row.querySelector('[data-edit-date]').addEventListener('click',()=>{
       const newText = prompt('Edit reminder:', r.text);
-      if(newText !== null){ r.text = newText.trim() || r.text; renderCalendar(); }
+      if(newText !== null){ r.text = newText.trim() || r.text; renderCalendar(); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave(); }
     });
     list.appendChild(row);
   });
@@ -1020,7 +1020,7 @@ autosaveReminder.addEventListener('input',()=>{
   autosaveStatus.textContent='Saving...';
   reminderMemory = autosaveReminder.value;
   const now = new Date();
-  autosaveStatus.textContent='Saved';
+  autosaveStatus.textContent='Saved'; if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
   autosaveTime.textContent = now.toLocaleTimeString('en-HK',{hour:'2-digit',minute:'2-digit'});
 });
 
@@ -1029,7 +1029,7 @@ autosaveReminder.value = reminderMemory;
 const diseaseSel = document.getElementById('diseaseMonth');
 MONTHS_LIST.forEach((m,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=m.label; if(m.year===today.getFullYear()&&m.month===today.getMonth()) opt.selected=true; diseaseSel.appendChild(opt); });
 function getDaysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
-function renderDiseaseTable(){
+window.renderDiseaseTable = function renderDiseaseTable(){
   const idx = parseInt(diseaseSel.value,10);
   const {year,month} = MONTHS_LIST[idx];
   const days = getDaysInMonth(year,month);
@@ -1059,7 +1059,7 @@ function renderDiseaseTable(){
   document.getElementById('diseaseFoot').innerHTML = footHtml;
   document.querySelectorAll('.disease-table input[type=number]').forEach(inp=>inp.addEventListener('change',()=>{
     const di = parseInt(inp.dataset.dis,10); const day = parseInt(inp.dataset.day,10); const val = Math.max(0,parseInt(inp.value,10)||0); inp.value = val;
-    data[DISEASES[di]][day] = val;
+    data[DISEASES[di]][day] = val; if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
     document.getElementById(`tot-${di}`).textContent = data[DISEASES[di]].reduce((a,b)=>a+b,0);
     document.getElementById(`daytot-${day}`).textContent = DISEASES.reduce((s,dis)=>s+(data[dis][day]||0),0);
     document.getElementById('grandtot').textContent = DISEASES.reduce((s,dis)=>s+data[dis].reduce((a,b)=>a+b,0),0);
@@ -1074,7 +1074,7 @@ document.getElementById('exportCsvBtn').addEventListener('click',()=>{
   const blob = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`geriatric_disease_data_${mk}.csv`; a.click();
 });
 
-function renderDrugButtons(){
+window.renderDrugButtons = function renderDrugButtons(){
   const bar = document.getElementById('drugTypeBar');
   if(!bar) return;
   bar.innerHTML='';
@@ -1091,7 +1091,7 @@ function renderDrugButtons(){
 function drugThumbHTML(src){
   return src ? `<div class="drug-thumb has-image" tabindex="0"><img src="${src}" alt="Drug image"></div>` : `<div class="drug-thumb" tabindex="0"><div class="drug-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a1.414 1.414 0 0 0 0-2L16.5 5.5a1.414 1.414 0 0 0-2 0L4 16v4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Edit image</span></div></div>`;
 }
-function renderDrugTable(){
+window.renderDrugTable = function renderDrugTable(){
   const cat = DRUG_CATEGORIES[activeDrugCategory];
   const title = document.getElementById('activeDrugTitle');
   const subtitle = document.getElementById('activeDrugSubtitle');
@@ -1107,7 +1107,7 @@ function renderDrugTable(){
       <td><input value="${row.brand||''}" data-field="brand"></td>
       <td><div class="drug-thumb-wrap">${drugThumbHTML(row.image||'')}</div></td>
       <td><textarea data-field="use">${row.use||''}</textarea></td>`;
-    tr.querySelectorAll('input[data-field], textarea[data-field]').forEach(el=>el.addEventListener('input',()=>{ row[el.dataset.field]=el.value; }));
+    tr.querySelectorAll('input[data-field], textarea[data-field]').forEach(el=>el.addEventListener('input',()=>{ row[el.dataset.field]=el.value; if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave(); }));
     const thumb=tr.querySelector('.drug-thumb-wrap');
     thumb.addEventListener('click',()=>{ pendingDrugThumb=row; document.getElementById('drugCellUpload').click(); });
     thumb.addEventListener('keydown',e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); pendingDrugThumb=row; document.getElementById('drugCellUpload').click(); }});
@@ -1115,13 +1115,13 @@ function renderDrugTable(){
   });
 }
 const addDrugRowBtn = document.getElementById('addDrugRowBtn');
-if(addDrugRowBtn){ addDrugRowBtn.addEventListener('click',()=>{ DRUG_CATEGORIES[activeDrugCategory].items.push({drug:'',brand:'',use:'',image:''}); renderDrugTable(); }); }
+if(addDrugRowBtn){ addDrugRowBtn.addEventListener('click',()=>{ DRUG_CATEGORIES[activeDrugCategory].items.push({drug:'',brand:'',use:'',image:''}); renderDrugTable(); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave(); }); }
 const activeDrugUpload = document.getElementById('activeDrugUpload');
 if(activeDrugUpload){ activeDrugUpload.addEventListener('change',e=>{
   const files=[...e.target.files];
   files.forEach(file=>{
     const reader=new FileReader();
-    reader.onload=()=>{ DRUG_CATEGORIES[activeDrugCategory].items.push({drug:file.name.replace(/\.[^/.]+$/,''),brand:'',use:'',image:reader.result}); renderDrugTable(); };
+    reader.onload=()=>{ DRUG_CATEGORIES[activeDrugCategory].items.push({drug:file.name.replace(/\.[^/.]+$/,''),brand:'',use:'',image:reader.result}); renderDrugTable(); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave(); };
     reader.readAsDataURL(file);
   });
   e.target.value='';
@@ -1132,7 +1132,7 @@ if(drugCellUpload){
     const file=e.target.files[0];
     if(!file || !pendingDrugThumb) return;
     const reader=new FileReader();
-    reader.onload=()=>{ pendingDrugThumb.image=reader.result; renderDrugTable(); pendingDrugThumb=null; };
+    reader.onload=()=>{ pendingDrugThumb.image=reader.result; renderDrugTable(); pendingDrugThumb=null; if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave(); };
     reader.readAsDataURL(file);
     e.target.value='';
   });
@@ -1319,5 +1319,97 @@ syncFab('dashboard');
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
 })();
 </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDNDrUb7Shir0bCGohgx4JNuB2q49B5jAk",
+  authDomain: "qmh-gem.firebaseapp.com",
+  databaseURL: "https://qmh-gem-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "qmh-gem",
+  storageBucket: "qmh-gem.firebasestorage.app",
+  messagingSenderId: "1071667673131",
+  appId: "1:1071667673131:web:e73ceb4387a5248aff926e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const STATE_PATH = 'geriatricFrontDoorTool/state';
+let suppressRemoteSave = false;
+let saveTimer = null;
+
+window.firebaseRealtime = {
+  db,
+  saveNow,
+  scheduleSave,
+  subscribeState
+};
+
+function collectState(){
+  return {
+    calendarEntries: window.calendarEntries || {},
+    reminderMemory: window.reminderMemory || '',
+    diseaseData: window.diseaseData || {},
+    drugCategories: window.DRUG_CATEGORIES || {},
+    activeDrugCategory: window.activeDrugCategory || 'cardiovascular'
+  };
+}
+
+function applyState(state){
+  if(!state) return;
+  suppressRemoteSave = true;
+  if(state.calendarEntries) window.calendarEntries = state.calendarEntries;
+  if(typeof state.reminderMemory === 'string') {
+    window.reminderMemory = state.reminderMemory;
+    const el = document.getElementById('autosaveReminder');
+    if(el) el.value = state.reminderMemory;
+  }
+  if(state.diseaseData) window.diseaseData = state.diseaseData;
+  if(state.drugCategories) window.DRUG_CATEGORIES = state.drugCategories;
+  if(state.activeDrugCategory) window.activeDrugCategory = state.activeDrugCategory;
+  if(typeof window.renderCalendar === 'function') window.renderCalendar();
+  if(typeof window.renderDiseaseTable === 'function') window.renderDiseaseTable();
+  if(typeof window.renderDrugButtons === 'function') window.renderDrugButtons();
+  if(typeof window.renderDrugTable === 'function') window.renderDrugTable();
+  setTimeout(()=>{ suppressRemoteSave = false; }, 200);
+}
+
+async function saveNow(){
+  if(suppressRemoteSave) return;
+  try {
+    await set(ref(db, STATE_PATH), collectState());
+    const status = document.getElementById('autosaveStatus');
+    const time = document.getElementById('autosaveTime');
+    if(status) status.textContent = 'Saved to cloud';
+    if(time) time.textContent = new Date().toLocaleTimeString('en-HK',{hour:'2-digit',minute:'2-digit'});
+  } catch (err) {
+    console.error('Firebase save failed', err);
+    const status = document.getElementById('autosaveStatus');
+    if(status) status.textContent = 'Cloud save failed';
+  }
+}
+
+function scheduleSave(){
+  if(suppressRemoteSave) return;
+  clearTimeout(saveTimer);
+  const status = document.getElementById('autosaveStatus');
+  if(status) status.textContent = 'Saving to cloud...';
+  saveTimer = setTimeout(saveNow, 500);
+}
+
+function subscribeState(){
+  onValue(ref(db, STATE_PATH), (snapshot)=>{
+    const state = snapshot.val();
+    if(state) applyState(state);
+  });
+}
+
+window.addEventListener('load', ()=>{
+  subscribeState();
+  setTimeout(()=>saveNow(), 1200);
+});
+</script>
+
 </body>
 </html>
