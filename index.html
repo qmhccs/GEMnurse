@@ -1406,6 +1406,7 @@ function subscribeState(){
 }
 
 window.addEventListener('load', ()=>{
+      try{const ls=localStorage.getItem('gemState');if(ls)applyState(JSON.parse(ls));}catch(e){}
   subscribeState();
   setTimeout(()=>saveNow(), 1200);
 });
@@ -1413,4 +1414,5 @@ window.addEventListener('load', ()=>{
 
 </body>
 </html>
+
 
