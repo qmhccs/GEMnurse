@@ -926,7 +926,7 @@ window.renderCalendar = function renderCalendar(){
     const isToday = calYear===today.getFullYear() && calMonth===today.getMonth() && d===today.getDate();
     const isSun = new Date(calYear,calMonth,d).getDay()===0;
     const isHol = key in HK_HOLIDAYS;
-    const dayEntries = calendarEntries[key] || [];
+    const dayEntries = window.calendarEntries[key] || [];
     const hasNote = dayEntries.length>0;
     const hasNurseHoliday = dayEntries.some(e=>e.type==='nurseHoliday');
     const el=document.createElement('div');
@@ -963,8 +963,8 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   if(!txt) return;
   const type = document.getElementById('modalType').value;
   const pri = document.getElementById('modalPriority').value;
-  if(!calendarEntries[modalKey]) calendarEntries[modalKey] = [];
-  calendarEntries[modalKey].push({type,text:txt,priority:pri}); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
+  if(!window.calendarEntries[modalKey]) window.calendarEntries[modalKey] = [];
+  window.calendarEntries[modalKey].push({type,text:txt,priority:pri}); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
   document.getElementById('modalBg').classList.remove('open');
   renderCalendar();
 });
@@ -979,9 +979,9 @@ function renderReminders(){
   const fmt = d => `${d.getDate()} ${monthNames[d.getMonth()]}`;
   label.textContent = `${fmt(weekStart)} - ${fmt(weekEnd)}`;
   const items = [];
-  Object.keys(calendarEntries).forEach(k=>{
+  Object.keys(window.calendarEntries).forEach(k=>{
     const d = new Date(k+'T00:00:00');
-    if(d>=weekStart && d<=weekEnd){ calendarEntries[k].forEach((r,i)=>items.push({date:k,r,i})); }
+    if(d>=weekStart && d<=weekEnd){ window.calendarEntries[k].forEach((r,i)=>items.push({date:k,r,i})); }
   });
   items.sort((a,b)=>a.date.localeCompare(b.date));
   if(!items.length){ list.innerHTML='<div class="li tiny">No update details for this week. Click any date on the calendar to add a reminder or nurse holiday.</div>'; return; }
@@ -1001,8 +1001,8 @@ function renderReminders(){
         <button class="btn btn-sec" style="padding:.25rem .6rem;font-size:.75rem;color:var(--err)" data-del-date="${date}" data-del-idx="${i}">Delete</button>
       </div>`;
     row.querySelector('[data-del-date]').addEventListener('click',()=>{
-      calendarEntries[date].splice(i,1); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
-      if(!calendarEntries[date].length) delete calendarEntries[date];
+      window.calendarEntries[date].splice(i,1); if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
+      if(!window.calendarEntries[date].length) delete window.calendarEntries[date];
       renderCalendar();
     });
     row.querySelector('[data-edit-date]').addEventListener('click',()=>{
