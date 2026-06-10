@@ -1018,7 +1018,7 @@ const autosaveStatus = document.getElementById('autosaveStatus');
 const autosaveTime = document.getElementById('autosaveTime');
 autosaveReminder.addEventListener('input',()=>{
   autosaveStatus.textContent='Saving...';
-  reminderMemory = autosaveReminder.value;
+  window.reminderMemory = autosaveReminder.value;
   const now = new Date();
   autosaveStatus.textContent='Saved'; if(window.firebaseRealtime) window.firebaseRealtime.scheduleSave();
   autosaveTime.textContent = now.toLocaleTimeString('en-HK',{hour:'2-digit',minute:'2-digit'});
@@ -1378,7 +1378,7 @@ function applyState(state){
 async function saveNow(){
   if(suppressRemoteSave) return;
   try {
-    await set(ref(db, STATE_PATH), collectState());
+    try{localStorage.setItem('gemState',JSON.stringify(collectState()));}catch(e){}     await set(ref(db, STATE_PATH), collectState());
     const status = document.getElementById('autosaveStatus');
     const time = document.getElementById('autosaveTime');
     if(status) status.textContent = 'Saved to cloud';
